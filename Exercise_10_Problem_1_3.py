@@ -13,6 +13,8 @@ import pandas as pd
 data = None
 # YOUR CODE HERE 1 to read the data
 data = pd.read_table('shopping_centers.txt', sep=';', header=None)
+data.index.name = 'id'
+data.columns=['name', 'addr']
 
 #TEST COEE
 # Check your input data
@@ -40,7 +42,7 @@ print(type(geo))
 # Check that the coordinate reference system of the geocoded result is correctly defined, and **reproject the layer into JGD2011** (EPSG:6668):
 
 # YOUR CODE HERE 3 to set crs.
-
+geo=geo.to_crs(6668)
 
 #TEST CODE
 # Check layer crs
@@ -61,6 +63,8 @@ print(geodata.head())
 # Define output filepath
 out_fp = None
 # YOUR CODE HERE 5 to save the output
+out_fp = "shopping_centers.shp"
+
 
 # TEST CODE
 # Print info about output file
@@ -74,9 +78,11 @@ print("Geocoded output is stored in this file:", out_fp)
 
 # YOUR CODE HERE 6 to create a new column
 geodata['buffer']=None
-geodata['buffer'] = geodata['geometry'].buffer(distance=1500)
+
 
 # YOUR CODE HERE 7 to set buffer column
+geodata = geodata.to_crs(32634)
+geodata['buffer'] = geodata['geometry'].buffer(distance=1500)
 
 
 #TEST CODE
@@ -109,6 +115,8 @@ print(geodata.head())
 # 
 
 # YOUR CODE HERE 9
+pop = None
+
 # Read population grid data for 2018 into a variable `pop`. 
 
 #TEST CODE
@@ -122,9 +130,15 @@ print(pop.head(3))
 
 # Create a spatial join between grid layer and buffer layer. 
 # YOUR CDOE HERE 10 for spatial join
+join = gpd.sjoin(geodata, pop, how="inner", op="intersects")
+
 
 
 # YOUR CODE HERE 11 to report how many people live within 1.5 km distance from each shopping center
+grouped = join.groupby('name')
+for key, group in grouped:
+    print('store: ', key,"\n", 'population:', sum(group['asukkaita']))
+
 
 # **Reflections:**
 #     

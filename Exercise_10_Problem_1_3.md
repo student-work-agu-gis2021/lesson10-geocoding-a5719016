@@ -29,6 +29,8 @@ import pandas as pd
 # Read the data (replace "None" with your own code)
 data = None
 # YOUR CODE HERE 1 to read the data
+data=pd.read_table('shopping_centers.txt', sep=';', header=None)
+data.columns=['id','name', 'addr']
 ```
 
 
@@ -48,6 +50,7 @@ from geopandas.tools import geocode
 
 # Geocode addresses using Nominatim. Remember to provide a custom "application name" in the user_agent parameter!
 # YOUR CODE HERE 2 for geocoding
+geo = geocode(data['addr'], provider='nominatim', user_agent='autogis_xx')
 ```
 
 
@@ -69,6 +72,7 @@ Check that the coordinate reference system of the geocoded result is correctly d
 
 ```python
 # YOUR CODE HERE 3 to set crs.
+geo = geo.to_crs(6668)
 ```
 
 
@@ -86,6 +90,8 @@ print(geo.crs)
 ```python
 # YOUR CODE HERE 4 to join the tables
 geodata = None
+geodata = None
+geodata =geo.join(data)
 ```
 
 
@@ -102,6 +108,8 @@ print(geodata.head())
 # Define output filepath
 out_fp = None
 #  YOUR CODE HERE 5 to save the output 
+out_fp = r"shopping_centers.shp"
+geodata.to_file(out_fp)
 ```
 
 ```python
@@ -120,6 +128,7 @@ Let's continue with our case study and calculate a 1.5 km buffer around the geoc
 
 ```python
 # YOUR CODE HERE 6 to create a new column
+geodata['buffer']=None
 ```
 
 - Calculate a 1.5 km buffer for each geocoded point. Store the buffer geometry in the new `buffer` column.
@@ -131,6 +140,8 @@ Before using buffer() method, convert the crs to a projected crs in meters, for 
 
 ```python
 # YOUR CODE HERE 7 to set buffer column
+geodata = geodata.to_crs(32634)
+geodata['buffer'] = geodata['geometry'].buffer(distance=1500)
 ```
 
 
@@ -158,6 +169,7 @@ print(round(gpd.GeoSeries(geodata["buffer"]).area / 1000000))
 
 ```python
 # YOUR CODE HERE 8 to replace the values in geometry
+geodata['geometry'] =geodata['buffer']
 ```
 
 
@@ -233,12 +245,20 @@ print(pop.head(3))
 ```python
 # Create a spatial join between grid layer and buffer layer. 
 # YOUR CODE HERE 10 for spatial join
-```
+join = gpd.sjoin(geodata, pop, how="inner", op="intersects")
+tokyu = join.loc[join["name"] == "Tokyu Department Store"]
+seibu = join.loc[join["name"] == "Seibu Shibuya Store"]
+azabu = join.loc[join["name"] == 'National Azabu']
 
 
 ```python
 #YOUR CODE HERE 11 to report how many people live within 1.5 km distance from each shopping center
-```
+tokyu_sum=round(tokyu["PTN_2020"].sum())
+seibu_sum=round(seibu["PTN_2020"].sum())
+azabu_sum=round(azabu["PTN_2020"].sum())
+print("Tokyu Department Store :"+str(tokyu_sum))
+print("Seibu Shibuya Store :"+str(seibu_sum))
+print("National Azabu :"+str(azabu_sum))
 
 **Reflections:**
     
