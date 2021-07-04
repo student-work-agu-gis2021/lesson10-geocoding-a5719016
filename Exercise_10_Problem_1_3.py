@@ -41,6 +41,7 @@ print(type(geo))
 
 # YOUR CODE HERE 3 to set crs.
 
+
 #TEST CODE
 # Check layer crs
 print(geo.crs)
@@ -48,6 +49,7 @@ print(geo.crs)
 
 # YOUR CODE HERE 4 to join the tables
 geodata = None
+geodata = geo.join(data)
 
 #TEST CODE
 # Check the join output
